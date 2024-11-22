@@ -1,4 +1,3 @@
-
 import debounce from './debounce.js';
 
 export class Slide {
@@ -39,15 +38,13 @@ export class Slide {
   }
 
   onMove(event) {
-    const poiterPosition = event.type === 'mousemove'
-      ? event.clientX
-      : event.changedTouches[0].clientX;
-    const finalPosition = this.updatePosition(poiterPosition);
+    const pointerPosition = (event.type === 'mousemove') ? event.clientX : event.changedTouches[0].clientX;
+    const finalPosition = this.updatePosition(pointerPosition);
     this.moveSlide(finalPosition);
   }
 
   onEnd(event) {
-    const movetype = event.type === 'mouseup' ? 'mousemove' : 'touchmove';
+    const movetype = (event.type === 'mouseup') ? 'mousemove' : 'touchmove';
     this.wrapper.removeEventListener(movetype, this.onMove);
     this.dist.finalPosition = this.dist.movePosition;
     this.transition(true);
@@ -69,15 +66,6 @@ export class Slide {
     this.wrapper.addEventListener('touchstart', this.onStart);
     this.wrapper.addEventListener('mouseup', this.onEnd);
     this.wrapper.addEventListener('touchend', this.onEnd);
-  }
-
-  bindEvents() {
-    this.onStart = this.onStart.bind(this);
-    this.onMove = this.onMove.bind(this);
-    this.onEnd = this.onEnd.bind(this);
-    this.onResize = debounce(this.onResize.bind(this), 200);
-    this.activePrevSlide = this.activePrevSlide.bind(this);
-    this.activeNextSlide = this.activeNextSlide.bind(this);
   }
 
   // Slides config
@@ -136,6 +124,17 @@ export class Slide {
     window.addEventListener('resize', this.onResize);
   }
 
+  bindEvents() {
+    this.onStart = this.onStart.bind(this);
+    this.onMove = this.onMove.bind(this);
+    this.onEnd = this.onEnd.bind(this);
+
+    this.activePrevSlide = this.activePrevSlide.bind(this);
+    this.activeNextSlide = this.activeNextSlide.bind(this);
+
+    this.onResize = debounce(this.onResize.bind(this), 200);
+  }
+
   init() {
     this.bindEvents();
     this.transition(true);
@@ -156,21 +155,19 @@ export default class SlideNav extends Slide {
   addArrow(prev, next) {
     this.prevElement = document.querySelector(prev);
     this.nextElement = document.querySelector(next);
-    this.addArroweEvent();
+    this.addArrowEvent();
   }
 
-  addArroweEvent() {
+  addArrowEvent() {
     this.prevElement.addEventListener('click', this.activePrevSlide);
     this.nextElement.addEventListener('click', this.activeNextSlide);
   }
-  // eslint-disable-next-line lines-between-class-members
+
   createControl() {
     const control = document.createElement('ul');
     control.dataset.control = 'slide';
     this.slideArray.forEach((item, index) => {
-      control.innerHTML += `<li><a href="slide${index + 1}">${
-        index + 1
-      }</a></li>`;
+      control.innerHTML += `<li><a href="#slide${index + 1}">${index + 1}</a></li>`;
     });
     this.wrapper.appendChild(control);
     return control;
@@ -180,9 +177,13 @@ export default class SlideNav extends Slide {
     item.addEventListener('click', (event) => {
       event.preventDefault();
       this.changeSlide(index);
-      this.activeControlItem();
     });
     this.wrapper.addEventListener('changeEvent', this.activeControlItem);
+  }
+
+  activeControlItem() {
+    this.controlArray.forEach(item => item.classList.remove(this.activeClass));
+    this.controlArray[this.index.active].classList.add(this.activeClass);
   }
 
   addControl(customControl) {
@@ -191,11 +192,6 @@ export default class SlideNav extends Slide {
 
     this.activeControlItem();
     this.controlArray.forEach(this.eventControl);
-  }
-
-  activeControlItem() {
-    this.controlArray.forEach(item => item.classList.remove(this.activeClass));
-    this.controlArray[this.index.active].classList.add(this.activeClass);
   }
 
   bindControlEvents() {
